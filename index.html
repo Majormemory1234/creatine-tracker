@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-theme="tokyo">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131f">
+  <meta name="description" content="A private, local-first daily creatine intake tracker.">
+  <title>creatinectl — daily creatine tracker</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script type="module" src="app.js?v=1"></script>
+</head>
+<body>
+  <div class="wallpaper" aria-hidden="true"></div>
+
+  <section id="login-view" class="login-view">
+    <div class="login-card panel">
+      <div class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="ascii-logo" aria-hidden="true">┌─[ creatinectl ]─[ v1.0 ]
+└─$ track --daily --local</div>
+      <p class="eyebrow">LOCAL-FIRST HEALTH LOG</p>
+      <h1>Welcome back<span class="accent">_</span></h1>
+      <p class="muted">Sign in to unlock your local intake ledger.</p>
+
+      <form id="login-form" class="stack" autocomplete="on">
+        <label>
+          <span>username</span>
+          <span class="prompt-field"><b>❯</b><input id="username" name="username" autocomplete="username" required autofocus></span>
+        </label>
+        <label>
+          <span>password</span>
+          <span class="prompt-field"><b>❯</b><input id="password" name="password" type="password" autocomplete="current-password" required></span>
+        </label>
+        <p id="login-error" class="form-error" role="alert" aria-live="polite"></p>
+        <button class="primary wide" type="submit"><span>↳</span> authenticate</button>
+      </form>
+      <p class="microcopy">🔒 Convenience lock · your entries stay in this browser</p>
+    </div>
+  </section>
+
+  <div id="app" class="app" hidden>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Creatine tracker home"><span class="brand-glyph">◈</span> creatine<span>ctl</span></a>
+      <div class="workspace"><span class="status-dot"></span> localhost <span class="sep">/</span> daily-ledger</div>
+      <div class="top-actions">
+        <label class="theme-picker" title="Color scheme">
+          <span class="sr-only">Theme</span>
+          <select id="theme-select">
+            <option value="tokyo">Tokyo Night</option>
+            <option value="catppuccin">Catppuccin</option>
+            <option value="gruvbox">Gruvbox</option>
+          </select>
+        </label>
+        <button id="logout-button" class="icon-button" title="Log out" aria-label="Log out">⏻</button>
+      </div>
+    </header>
+
+    <main id="top" class="dashboard">
+      <section class="hero-row">
+        <div>
+          <p class="eyebrow"><span class="status-dot"></span> SYSTEM ONLINE</p>
+          <h1>Daily protocol</h1>
+          <p id="today-label" class="muted"></p>
+        </div>
+        <div class="mini-terminal" aria-label="Current profile">
+          <span><b>user</b>@creatinectl</span>
+          <span><b>mode</b>: local-only</span>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Daily statistics">
+        <article class="stat-card panel featured">
+          <div class="stat-icon">C₄</div>
+          <div>
+            <p>Today</p>
+            <strong><span id="today-total">0.0</span><small> g</small></strong>
+          </div>
+          <div class="goal-ring" id="goal-ring" aria-label="Goal progress"><span id="goal-percent">0%</span></div>
+        </article>
+        <article class="stat-card panel">
+          <div class="stat-icon">◎</div>
+          <div><p>Daily goal</p><strong><span id="goal-value">5.0</span><small> g</small></strong></div>
+          <button id="edit-goal-button" class="text-button">edit</button>
+        </article>
+        <article class="stat-card panel">
+          <div class="stat-icon">↯</div>
+          <div><p>Current streak</p><strong><span id="streak-value">0</span><small> days</small></strong></div>
+        </article>
+        <article class="stat-card panel">
+          <div class="stat-icon">◷</div>
+          <div><p>Last dose</p><strong id="last-dose" class="smaller">—</strong></div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel log-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">NEW EVENT</p><h2>Log creatine</h2></div>
+            <span class="command-chip">creatine add</span>
+          </div>
+          <form id="entry-form" class="entry-form">
+            <label class="dose-label">
+              <span>dose</span>
+              <span class="dose-input"><input id="grams" name="grams" type="number" inputmode="decimal" min="0.1" max="100" step="0.1" value="5" required><b>grams</b></span>
+            </label>
+            <label>
+              <span>note <em>optional</em></span>
+              <input id="note" name="note" maxlength="80" placeholder="e.g. post-workout">
+            </label>
+            <button class="primary" type="submit"><span>+</span> commit entry</button>
+          </form>
+          <div class="quick-row" aria-label="Quick dose amounts">
+            <span>quick:</span>
+            <button class="quick-dose" data-dose="3" type="button">3 g</button>
+            <button class="quick-dose" data-dose="5" type="button">5 g</button>
+            <button class="quick-dose" data-dose="10" type="button">10 g</button>
+          </div>
+          <p id="save-message" class="save-message" role="status" aria-live="polite"></p>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">LAST 7 DAYS</p><h2>Intake signal</h2></div>
+            <span id="week-total" class="command-chip">0 g total</span>
+          </div>
+          <div id="week-chart" class="week-chart" aria-label="Creatine intake over the last seven days"></div>
+        </article>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-heading history-heading">
+          <div><p class="eyebrow">EVENT LOG</p><h2>Recent entries</h2></div>
+          <div class="data-actions">
+            <button id="export-button" class="secondary" type="button">⇩ export</button>
+            <label class="secondary file-button">⇧ import<input id="import-input" type="file" accept="application/json"></label>
+            <button id="reset-button" class="danger" type="button">reset</button>
+          </div>
+        </div>
+        <div id="empty-state" class="empty-state">
+          <div>∅</div>
+          <h3>No entries yet</h3>
+          <p>Your first dose will appear here with its exact date and time.</p>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <footer>
+        <span>creatinectl v1.0.0</span>
+        <span><i class="status-dot"></i> data persisted locally</span>
+        <button id="security-info-button" class="text-button">privacy &amp; login info</button>
+      </footer>
+    </main>
+  </div>
+
+  <dialog id="goal-dialog" class="modal panel">
+    <form id="goal-form" method="dialog">
+      <div class="panel-heading"><div><p class="eyebrow">CONFIG</p><h2>Daily target</h2></div><button id="close-goal-button" class="icon-button" type="button" aria-label="Close">×</button></div>
+      <label><span>grams per day</span><input id="goal-input" type="number" min="0.1" max="100" step="0.1" required></label>
+      <div class="modal-actions"><button id="cancel-goal-button" class="secondary" type="button">cancel</button><button id="save-goal-button" class="primary" type="submit">save target</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="security-dialog" class="modal panel">
+    <form method="dialog">
+      <div class="panel-heading"><div><p class="eyebrow">README</p><h2>Static-site privacy</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+      <div class="prose">
+        <p>GitHub Pages cannot run a secure server-side login or private database. This login is a convenience screen, not strong security: its credentials are necessarily present in the public website code.</p>
+        <p>Entries are stored only in this browser using <code>localStorage</code>. They are not uploaded to GitHub. Export a backup if you switch browser or device.</p>
+      </div>
+      <div class="modal-actions"><button class="primary" value="default">understood</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="reset-dialog" class="modal panel">
+    <form method="dialog">
+      <div class="panel-heading"><div><p class="eyebrow danger-text">DESTRUCTIVE</p><h2>Erase all entries?</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+      <p class="muted">This removes every locally stored dose from this browser. Export first if you need a backup.</p>
+      <div class="modal-actions"><button class="secondary" value="cancel">cancel</button><button id="confirm-reset-button" class="danger solid" value="default">erase everything</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
