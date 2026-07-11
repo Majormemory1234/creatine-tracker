@@ -159,6 +159,8 @@ input:hover, input:focus, select:hover { border-color: var(--line-hot); }
 
 footer { padding: 24px 4px 0; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 8px; }
 footer .status-dot { width: 5px; height: 5px; }
+.account-link { color: var(--accent); text-decoration: none; }
+.account-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 .modal { width: min(92vw, 440px); padding: 26px; border-radius: 14px; color: var(--text); }
 .modal::backdrop { background: rgba(3, 4, 9, .75); backdrop-filter: blur(6px); }
 .modal .panel-heading { margin-bottom: 22px; }
